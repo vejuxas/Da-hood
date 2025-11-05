@@ -1,14 +1,5 @@
---[[
-	Hitbox Expander with Compkiller UI
-	Press Left Alt to open / close
-]]
 
-local Compkiller = loadstring(game:HttpGet("https://raw.githubusercontent.com/vejuxas/hitbox-expander/refs/heads/main/uilibrary"))()
-
-if not Compkiller then
-	warn("Failed to load Compkiller UI library!")
-	return
-end
+print("Compkiller UI library loaded successfully!")
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -237,18 +228,6 @@ local AimTab = Window:DrawTab({
 local LegitTab = Window:DrawTab({
 	Name = "Legit",
 	Icon = "activity",
-	Type = "Double",
-	EnableScrolling = true
-});
-
--- Creating Utility Category and Tab
-Window:DrawCategory({
-	Name = "Utility"
-});
-
-local UtilityTab = Window:DrawTab({
-	Name = "Utility",
-	Icon = "shield",
 	Type = "Double",
 	EnableScrolling = true
 });
@@ -2140,193 +2119,6 @@ LegitRightSection:AddToggle({
 	end,
 });
 
--- ===== UTILITY TAB CONTENT =====
-
--- Utility Left Section 1
-local UtilityAntiSection = UtilityTab:DrawSection({
-	Name = "Section",
-	Position = 'left'
-});
-
-UtilityAntiSection:AddToggle({
-	Name = "Anti Slow",
-	Flag = "AntiSlow",
-	Default = false,
-	Callback = function(v) end,
-});
-
-UtilityAntiSection:AddToggle({
-	Name = "Anti stomp",
-	Flag = "AntiStompUtil",
-	Default = false,
-	Callback = function(v) end,
-});
-
-UtilityAntiSection:AddToggle({
-	Name = "Anti Void",
-	Flag = "AntiVoid",
-	Default = false,
-	Callback = function(v) end,
-});
-
--- Utility Left Section 2
-local UtilityAspectSection = UtilityTab:DrawSection({
-	Name = "Section",
-	Position = 'left'
-});
-
-local aspectRatioToggle = false
-local horizontalStretch = 29
-local verticalStretch = 10
-
-UtilityAspectSection:AddToggle({
-	Name = "Aspect Ratio Toggle",
-	Flag = "AspectRatioToggle",
-	Default = false,
-	Callback = function(v) aspectRatioToggle = v end,
-});
-
-UtilityAspectSection:AddSlider({
-	Name = "Horizontal Stretch",
-	Min = 0,
-	Max = 100,
-	Default = 29,
-	Round = 0,
-	Flag = "HorizontalStretch",
-	Callback = function(v) horizontalStretch = v end
-});
-
-UtilityAspectSection:AddSlider({
-	Name = "Vertical Stretch",
-	Min = 0,
-	Max = 100,
-	Default = 10,
-	Round = 0,
-	Flag = "VerticalStretch",
-	Callback = function(v) verticalStretch = v end
-});
-
--- Utility Left Section 3
-local UtilityVisualSection = UtilityTab:DrawSection({
-	Name = "Section",
-	Position = 'left'
-});
-
-local noFog = false
-local fovToggle = false
-local fovSlider = 16
-
-UtilityVisualSection:AddToggle({
-	Name = "No fog",
-	Flag = "NoFog",
-	Default = false,
-	Callback = function(v) noFog = v end,
-});
-
-UtilityVisualSection:AddToggle({
-	Name = "fovToggle",
-	Flag = "FovToggle",
-	Default = false,
-	Callback = function(v) fovToggle = v end,
-});
-
-UtilityVisualSection:AddSlider({
-	Name = "fov slider",
-	Min = 1,
-	Max = 120,
-	Default = 16,
-	Round = 0,
-	Flag = "FovSlider",
-	Callback = function(v) fovSlider = v end
-});
-
--- Utility Right Section 1
-local UtilityAutoSection = UtilityTab:DrawSection({
-	Name = "Section",
-	Position = 'right'
-});
-
-UtilityAutoSection:AddToggle({
-	Name = "Auto Stomp",
-	Flag = "UtilityAutoStomp",
-	Default = false,
-	Callback = function(v) end,
-});
-
-UtilityAutoSection:AddToggle({
-	Name = "Auto Reload",
-	Flag = "UtilityAutoReload",
-	Default = false,
-	Callback = function(v) end,
-});
-
--- Utility Right Section 2
-local UtilityGearSection = UtilityTab:DrawSection({
-	Name = "Section",
-	Position = 'right'
-});
-
-UtilityGearSection:AddToggle({
-	Name = "Auto Armor",
-	Flag = "AutoArmor",
-	Default = false,
-	Callback = function(v) end,
-});
-
-UtilityGearSection:AddToggle({
-	Name = "Auto mask",
-	Flag = "AutoMask",
-	Default = false,
-	Callback = function(v) end,
-});
-
--- Utility Right Section 3
-local UtilityCashSection = UtilityTab:DrawSection({
-	Name = "Section",
-	Position = 'right'
-});
-
-UtilityCashSection:AddToggle({
-	Name = "Auto drop cash",
-	Flag = "AutoDropCash",
-	Default = false,
-	Callback = function(v) end,
-});
-
-UtilityCashSection:AddToggle({
-	Name = "Cash Aura",
-	Flag = "CashAura",
-	Default = false,
-	Callback = function(v) end,
-});
-
--- Utility Right Section 4
-local UtilityAntiSection2 = UtilityTab:DrawSection({
-	Name = "Section",
-	Position = 'right'
-});
-
-UtilityAntiSection2:AddToggle({
-	Name = "Anti Sit",
-	Flag = "AntiSit",
-	Default = false,
-	Callback = function(v) end,
-});
-
-UtilityAntiSection2:AddToggle({
-	Name = "Anti RPG",
-	Flag = "AntiRPG",
-	Default = false,
-	Callback = function(v) end,
-});
-
-UtilityAntiSection2:AddToggle({
-	Name = "Anti Grenade",
-	Flag = "AntiGrenade",
-	Default = false,
-	Callback = function(v) end,
-});
-
 -- ===== KILL AURA IMPLEMENTATION (Silent Aim & Aimbot with Prediction) =====
 
 -- Target lock time tracking
@@ -3577,6 +3369,213 @@ local function UseSkin(Tool, SkinName)
 
     if CreateMesh(Tool, Skin.TextureID) then SkinList[Tool.Name] = Skin end
 end
+
+print("DEBUG: Creating Utility category...")
+
+-- Creating Utility Category and Tab
+Window:DrawCategory({
+	Name = "Utility"
+});
+
+print("DEBUG: Creating Utility tab...")
+
+local UtilityTab = Window:DrawTab({
+	Name = "Utility",
+	Icon = "shield",
+	Type = "Double",
+	EnableScrolling = true
+});
+
+print("DEBUG: Utility tab created, adding sections...")
+
+-- ===== UTILITY TAB CONTENT =====
+
+-- Utility Left Section 1 - Anti Features
+local UtilityAntiSection = UtilityTab:DrawSection({
+	Name = "Anti Features",
+	Position = 'left'
+});
+
+print("DEBUG: Anti Features section created...")
+
+UtilityAntiSection:AddToggle({
+	Name = "Anti Slow",
+	Flag = "AntiSlow",
+	Default = false,
+	Callback = function(v) end,
+});
+
+UtilityAntiSection:AddToggle({
+	Name = "Anti stomp",
+	Flag = "AntiStompUtil",
+	Default = false,
+	Callback = function(v) end,
+});
+
+UtilityAntiSection:AddToggle({
+	Name = "Anti Void",
+	Flag = "AntiVoid",
+	Default = false,
+	Callback = function(v) end,
+});
+
+-- Utility Left Section 2 - Aspect Ratio
+local UtilityAspectSection = UtilityTab:DrawSection({
+	Name = "Aspect Ratio",
+	Position = 'left'
+});
+
+local aspectRatioToggle = false
+local horizontalStretch = 29
+local verticalStretch = 10
+
+UtilityAspectSection:AddToggle({
+	Name = "Aspect Ratio Toggle",
+	Flag = "AspectRatioToggle",
+	Default = false,
+	Callback = function(v) aspectRatioToggle = v end,
+});
+
+UtilityAspectSection:AddSlider({
+	Name = "Horizontal Stretch",
+	Min = 0,
+	Max = 100,
+	Default = 29,
+	Round = 0,
+	Flag = "HorizontalStretch",
+	Callback = function(v) horizontalStretch = v end
+});
+
+UtilityAspectSection:AddSlider({
+	Name = "Vertical Stretch",
+	Min = 0,
+	Max = 100,
+	Default = 10,
+	Round = 0,
+	Flag = "VerticalStretch",
+	Callback = function(v) verticalStretch = v end
+});
+
+-- Utility Left Section 3 - Visual
+local UtilityVisualSection = UtilityTab:DrawSection({
+	Name = "Visual",
+	Position = 'left'
+});
+
+local noFog = false
+local fovToggle = false
+local fovSlider = 16
+
+UtilityVisualSection:AddToggle({
+	Name = "No fog",
+	Flag = "NoFog",
+	Default = false,
+	Callback = function(v) noFog = v end,
+});
+
+UtilityVisualSection:AddToggle({
+	Name = "fovToggle",
+	Flag = "FovToggle",
+	Default = false,
+	Callback = function(v) fovToggle = v end,
+});
+
+UtilityVisualSection:AddSlider({
+	Name = "fov slider",
+	Min = 1,
+	Max = 120,
+	Default = 16,
+	Round = 0,
+	Flag = "FovSlider",
+	Callback = function(v) fovSlider = v end
+});
+
+-- Utility Right Section 1 - Auto Features
+local UtilityAutoSection = UtilityTab:DrawSection({
+	Name = "Auto Features",
+	Position = 'right'
+});
+
+UtilityAutoSection:AddToggle({
+	Name = "Auto Stomp",
+	Flag = "UtilityAutoStomp",
+	Default = false,
+	Callback = function(v) end,
+});
+
+UtilityAutoSection:AddToggle({
+	Name = "Auto Reload",
+	Flag = "UtilityAutoReload",
+	Default = false,
+	Callback = function(v) end,
+});
+
+-- Utility Right Section 2 - Gear
+local UtilityGearSection = UtilityTab:DrawSection({
+	Name = "Gear",
+	Position = 'right'
+});
+
+UtilityGearSection:AddToggle({
+	Name = "Auto Armor",
+	Flag = "AutoArmor",
+	Default = false,
+	Callback = function(v) end,
+});
+
+UtilityGearSection:AddToggle({
+	Name = "Auto mask",
+	Flag = "AutoMask",
+	Default = false,
+	Callback = function(v) end,
+});
+
+-- Utility Right Section 3 - Cash
+local UtilityCashSection = UtilityTab:DrawSection({
+	Name = "Cash",
+	Position = 'right'
+});
+
+UtilityCashSection:AddToggle({
+	Name = "Auto drop cash",
+	Flag = "AutoDropCash",
+	Default = false,
+	Callback = function(v) end,
+});
+
+UtilityCashSection:AddToggle({
+	Name = "Cash Aura",
+	Flag = "CashAura",
+	Default = false,
+	Callback = function(v) end,
+});
+
+-- Utility Right Section 4 - Anti Combat
+local UtilityAntiSection2 = UtilityTab:DrawSection({
+	Name = "Anti Combat",
+	Position = 'right'
+});
+
+UtilityAntiSection2:AddToggle({
+	Name = "Anti Sit",
+	Flag = "AntiSit",
+	Default = false,
+	Callback = function(v) end,
+});
+
+UtilityAntiSection2:AddToggle({
+	Name = "Anti RPG",
+	Flag = "AntiRPG",
+	Default = false,
+	Callback = function(v) end,
+});
+
+UtilityAntiSection2:AddToggle({
+	Name = "Anti Grenade",
+	Flag = "AntiGrenade",
+	Default = false,
+	Callback = function(v) end,
+});
 
 -- Add Misc category and tab (from working script)
 Window:DrawCategory({
