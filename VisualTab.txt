@@ -1,0 +1,759 @@
+-- Visual Tab Script for AntiV4
+-- Load this with: loadstring(game:HttpGet("YOUR_GITHUB_RAW_URL"))()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local Mouse = LocalPlayer:GetMouse()
+
+-- Get globals from main script
+local VisualsTab = getgenv().VisualsTab
+local Notifier = getgenv().Notifier
+
+if not VisualsTab then
+	warn("VisualsTab not found! Make sure to load main script first.")
+	return
+end
+
+-- ESP Variables
+local espEnabled = false
+local boxESP = false
+local nameESP = false
+local healthESP = false
+local healthBarESP = false
+local distanceESP = false
+local tracersESP = false
+local skeletonESP = false
+local highlightESP = false
+local chamsESP = false
+local weaponESP = false
+local armorESP = false
+local bulletTracers = false
+local damageIndicators = false
+local espColor = Color3.fromRGB(255, 255, 255)
+local espDrawings = {}
+local damageLabels = {}
+
+-- Visuals Left Section - ESP Settings
+local VisualsESPSection = VisualsTab:DrawSection({
+	Name = "ESP",
+	Position = 'left'
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Enable ESP",
+	Flag = "EnableESP",
+	Default = false,
+	Callback = function(v)
+		espEnabled = v
+		if not v then
+			-- Clean up all ESP
+			for _, drawings in pairs(espDrawings) do
+				for _, drawing in pairs(drawings) do
+					if drawing then
+						pcall(function() drawing.Visible = false drawing:Remove() end)
+					end
+				end
+			end
+			espDrawings = {}
+			
+			-- Remove highlights
+			for _, player in pairs(Players:GetPlayers()) do
+				if player.Character then
+					local highlight = player.Character:FindFirstChild("ESPHighlight")
+					if highlight then highlight:Destroy() end
+					
+					for _, part in pairs(player.Character:GetDescendants()) do
+						if part:IsA("BasePart") then
+							part.Color = part:GetAttribute("OriginalColor") or part.Color
+							part.Material = part:GetAttribute("OriginalMaterial") or part.Material
+						end
+					end
+				end
+			end
+		end
+	end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Box ESP",
+	Flag = "BoxESP",
+	Default = false,
+	Callback = function(v) boxESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Name ESP",
+	Flag = "NameESP",
+	Default = false,
+	Callback = function(v) nameESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Health ESP",
+	Flag = "HealthESP",
+	Default = false,
+	Callback = function(v) healthESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Health Bar",
+	Flag = "HealthBarESP",
+	Default = false,
+	Callback = function(v) healthBarESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Distance ESP",
+	Flag = "DistanceESP",
+	Default = false,
+	Callback = function(v) distanceESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Tracers",
+	Flag = "TracersESP",
+	Default = false,
+	Callback = function(v) tracersESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Skeleton ESP",
+	Flag = "SkeletonESP",
+	Default = false,
+	Callback = function(v) skeletonESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Highlight ESP",
+	Flag = "HighlightESP",
+	Default = false,
+	Callback = function(v) highlightESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Chams",
+	Flag = "ChamsESP",
+	Default = false,
+	Callback = function(v) chamsESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Weapon ESP",
+	Flag = "WeaponESP",
+	Default = false,
+	Callback = function(v) weaponESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Armor ESP",
+	Flag = "ArmorESP",
+	Default = false,
+	Callback = function(v) armorESP = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Bullet Tracers",
+	Flag = "BulletTracers",
+	Default = false,
+	Callback = function(v) bulletTracers = v end,
+});
+
+VisualsESPSection:AddToggle({
+	Name = "Damage Indicators",
+	Flag = "DamageIndicators",
+	Default = false,
+	Callback = function(v) damageIndicators = v end,
+});
+
+VisualsESPSection:AddColorPicker({
+	Name = "ESP Color",
+	Default = Color3.fromRGB(255, 255, 255),
+	Flag = "ESPColor",
+	Callback = function(v)
+		espColor = v
+	end
+});
+
+-- Visuals Right Section - World
+local VisualsWorldSection = VisualsTab:DrawSection({
+	Name = "World",
+	Position = 'right'
+});
+
+local fullBright = false
+local noFog = false
+local ambientColor = Color3.fromRGB(255, 255, 255)
+
+VisualsWorldSection:AddToggle({
+	Name = "Fullbright",
+	Flag = "Fullbright",
+	Default = false,
+	Callback = function(v)
+		fullBright = v
+		if v then
+			game.Lighting.Brightness = 2
+			game.Lighting.ClockTime = 14
+			game.Lighting.FogEnd = 100000
+			game.Lighting.GlobalShadows = false
+			game.Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+		else
+			game.Lighting.Brightness = 1
+			game.Lighting.ClockTime = 8
+			game.Lighting.FogEnd = 1000
+			game.Lighting.GlobalShadows = false
+			game.Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
+		end
+	end,
+});
+
+VisualsWorldSection:AddToggle({
+	Name = "No Fog",
+	Flag = "NoFogVisual",
+	Default = false,
+	Callback = function(v)
+		noFog = v
+		if v then
+			game.Lighting.FogEnd = 100000
+		else
+			game.Lighting.FogEnd = 1000
+		end
+	end,
+});
+
+VisualsWorldSection:AddToggle({
+	Name = "Remove Shadows",
+	Flag = "RemoveShadows",
+	Default = false,
+	Callback = function(v)
+		game.Lighting.GlobalShadows = not v
+	end,
+});
+
+VisualsWorldSection:AddToggle({
+	Name = "Remove Blur",
+	Flag = "RemoveBlurVisual",
+	Default = false,
+	Callback = function(v)
+		if v then
+			for _, effect in pairs(game.Lighting:GetChildren()) do
+				if effect:IsA("BlurEffect") then
+					effect.Enabled = false
+				end
+			end
+		end
+	end,
+});
+
+VisualsWorldSection:AddColorPicker({
+	Name = "Ambient Color",
+	Default = Color3.fromRGB(255, 255, 255),
+	Flag = "AmbientColor",
+	Callback = function(v)
+		ambientColor = v
+		if v ~= Color3.fromRGB(255, 255, 255) then
+			game.Lighting.Ambient = v
+		end
+	end
+});
+
+-- ESP Update Loop
+RunService.RenderStepped:Connect(function()
+	if not espEnabled then return end
+	
+	for _, player in pairs(Players:GetPlayers()) do
+		if player == LocalPlayer then continue end
+		
+		local character = player.Character
+		if not character then continue end
+		
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		local rootPart = character:FindFirstChild("HumanoidRootPart")
+		local head = character:FindFirstChild("Head")
+		
+		if not humanoid or humanoid.Health <= 0 or not rootPart or not head then
+			if espDrawings[player.UserId] then
+				for _, drawing in pairs(espDrawings[player.UserId]) do
+					if drawing then
+						pcall(function() drawing.Visible = false end)
+					end
+				end
+			end
+			continue
+		end
+		
+		if not espDrawings[player.UserId] then
+			espDrawings[player.UserId] = {}
+		end
+		
+		local screenPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+		
+		if not onScreen then
+			for _, drawing in pairs(espDrawings[player.UserId]) do
+				if drawing and drawing.Visible then
+					drawing.Visible = false
+				end
+			end
+			continue
+		end
+		
+		-- Box ESP
+		if boxESP then
+			local headPos = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
+			local legPos = Camera:WorldToViewportPoint(rootPart.Position - Vector3.new(0, 3, 0))
+			
+			local height = math.abs(headPos.Y - legPos.Y)
+			local width = height / 2
+			
+			if not espDrawings[player.UserId].box then
+				espDrawings[player.UserId].box = Drawing.new("Square")
+			end
+			
+			local box = espDrawings[player.UserId].box
+			box.Visible = true
+			box.Color = espColor
+			box.Thickness = 2
+			box.Filled = false
+			box.Transparency = 1
+			box.Size = Vector2.new(width, height)
+			box.Position = Vector2.new(screenPos.X - width/2, headPos.Y)
+		elseif espDrawings[player.UserId].box then
+			espDrawings[player.UserId].box.Visible = false
+		end
+		
+		-- Name ESP
+		if nameESP then
+			if not espDrawings[player.UserId].name then
+				espDrawings[player.UserId].name = Drawing.new("Text")
+			end
+			
+			local nameText = espDrawings[player.UserId].name
+			nameText.Visible = true
+			nameText.Text = player.Name
+			nameText.Color = espColor
+			nameText.Size = 16
+			nameText.Center = true
+			nameText.Outline = true
+			nameText.Position = Vector2.new(screenPos.X, screenPos.Y - 50)
+		elseif espDrawings[player.UserId].name then
+			espDrawings[player.UserId].name.Visible = false
+		end
+		
+		-- Health ESP
+		if healthESP then
+			if not espDrawings[player.UserId].health then
+				espDrawings[player.UserId].health = Drawing.new("Text")
+			end
+			
+			local healthText = espDrawings[player.UserId].health
+			healthText.Visible = true
+			healthText.Text = math.floor(humanoid.Health) .. " HP"
+			
+			local healthPercent = humanoid.Health / humanoid.MaxHealth
+			if healthPercent > 0.7 then
+				healthText.Color = Color3.fromRGB(0, 255, 0)
+			elseif healthPercent > 0.3 then
+				healthText.Color = Color3.fromRGB(255, 255, 0)
+			else
+				healthText.Color = Color3.fromRGB(255, 0, 0)
+			end
+			
+			healthText.Size = 14
+			healthText.Center = true
+			healthText.Outline = true
+			healthText.Position = Vector2.new(screenPos.X, screenPos.Y - 35)
+		elseif espDrawings[player.UserId].health then
+			espDrawings[player.UserId].health.Visible = false
+		end
+		
+		-- Health Bar ESP
+		if healthBarESP then
+			local headPos = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
+			local legPos = Camera:WorldToViewportPoint(rootPart.Position - Vector3.new(0, 3, 0))
+			local height = math.abs(headPos.Y - legPos.Y)
+			
+			if not espDrawings[player.UserId].healthBarBG then
+				espDrawings[player.UserId].healthBarBG = Drawing.new("Square")
+			end
+			if not espDrawings[player.UserId].healthBar then
+				espDrawings[player.UserId].healthBar = Drawing.new("Square")
+			end
+			
+			local healthBarBG = espDrawings[player.UserId].healthBarBG
+			local healthBar = espDrawings[player.UserId].healthBar
+			
+			healthBarBG.Visible = true
+			healthBarBG.Color = Color3.fromRGB(0, 0, 0)
+			healthBarBG.Filled = true
+			healthBarBG.Transparency = 0.5
+			healthBarBG.Size = Vector2.new(3, height)
+			healthBarBG.Position = Vector2.new(screenPos.X - height/2 - 7, headPos.Y)
+			
+			local healthPercent = humanoid.Health / humanoid.MaxHealth
+			healthBar.Visible = true
+			healthBar.Filled = true
+			healthBar.Transparency = 1
+			healthBar.Size = Vector2.new(3, height * healthPercent)
+			healthBar.Position = Vector2.new(screenPos.X - height/2 - 7, headPos.Y + (height * (1 - healthPercent)))
+			
+			if healthPercent > 0.7 then
+				healthBar.Color = Color3.fromRGB(0, 255, 0)
+			elseif healthPercent > 0.3 then
+				healthBar.Color = Color3.fromRGB(255, 255, 0)
+			else
+				healthBar.Color = Color3.fromRGB(255, 0, 0)
+			end
+		else
+			if espDrawings[player.UserId].healthBarBG then espDrawings[player.UserId].healthBarBG.Visible = false end
+			if espDrawings[player.UserId].healthBar then espDrawings[player.UserId].healthBar.Visible = false end
+		end
+		
+		-- Distance ESP
+		if distanceESP and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+			
+			if not espDrawings[player.UserId].distance then
+				espDrawings[player.UserId].distance = Drawing.new("Text")
+			end
+			
+			local distText = espDrawings[player.UserId].distance
+			distText.Visible = true
+			distText.Text = math.floor(distance) .. " studs"
+			distText.Color = espColor
+			distText.Size = 14
+			distText.Center = true
+			distText.Outline = true
+			distText.Position = Vector2.new(screenPos.X, screenPos.Y + 30)
+		elseif espDrawings[player.UserId].distance then
+			espDrawings[player.UserId].distance.Visible = false
+		end
+		
+		-- Tracers ESP
+		if tracersESP then
+			if not espDrawings[player.UserId].tracer then
+				espDrawings[player.UserId].tracer = Drawing.new("Line")
+			end
+			
+			local tracer = espDrawings[player.UserId].tracer
+			tracer.Visible = true
+			tracer.Color = espColor
+			tracer.Thickness = 2
+			tracer.Transparency = 1
+			tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+			tracer.To = Vector2.new(screenPos.X, screenPos.Y)
+		elseif espDrawings[player.UserId].tracer then
+			espDrawings[player.UserId].tracer.Visible = false
+		end
+		
+		-- Skeleton ESP
+		if skeletonESP then
+			local function drawBone(v1, v2, name)
+				local bone1 = character:FindFirstChild(v1)
+				local bone2 = character:FindFirstChild(v2)
+				
+				if bone1 and bone2 then
+					local pos1, vis1 = Camera:WorldToViewportPoint(bone1.Position)
+					local pos2, vis2 = Camera:WorldToViewportPoint(bone2.Position)
+					
+					if vis1 and vis2 then
+						if not espDrawings[player.UserId][name] then
+							espDrawings[player.UserId][name] = Drawing.new("Line")
+						end
+						
+						local line = espDrawings[player.UserId][name]
+						line.Visible = true
+						line.Color = espColor
+						line.Thickness = 1
+						line.Transparency = 1
+						line.From = Vector2.new(pos1.X, pos1.Y)
+						line.To = Vector2.new(pos2.X, pos2.Y)
+					elseif espDrawings[player.UserId][name] then
+						espDrawings[player.UserId][name].Visible = false
+					end
+				end
+			end
+			
+			drawBone("Head", "UpperTorso", "bone_head")
+			drawBone("UpperTorso", "LowerTorso", "bone_spine")
+			drawBone("UpperTorso", "LeftUpperArm", "bone_leftarm1")
+			drawBone("LeftUpperArm", "LeftLowerArm", "bone_leftarm2")
+			drawBone("LeftLowerArm", "LeftHand", "bone_leftarm3")
+			drawBone("UpperTorso", "RightUpperArm", "bone_rightarm1")
+			drawBone("RightUpperArm", "RightLowerArm", "bone_rightarm2")
+			drawBone("RightLowerArm", "RightHand", "bone_rightarm3")
+			drawBone("LowerTorso", "LeftUpperLeg", "bone_leftleg1")
+			drawBone("LeftUpperLeg", "LeftLowerLeg", "bone_leftleg2")
+			drawBone("LeftLowerLeg", "LeftFoot", "bone_leftleg3")
+			drawBone("LowerTorso", "RightUpperLeg", "bone_rightleg1")
+			drawBone("RightUpperLeg", "RightLowerLeg", "bone_rightleg2")
+			drawBone("RightLowerLeg", "RightFoot", "bone_rightleg3")
+		else
+			local boneNames = {
+				"bone_head", "bone_spine",
+				"bone_leftarm1", "bone_leftarm2", "bone_leftarm3",
+				"bone_rightarm1", "bone_rightarm2", "bone_rightarm3",
+				"bone_leftleg1", "bone_leftleg2", "bone_leftleg3",
+				"bone_rightleg1", "bone_rightleg2", "bone_rightleg3"
+			}
+			for _, boneName in pairs(boneNames) do
+				if espDrawings[player.UserId][boneName] then
+					espDrawings[player.UserId][boneName].Visible = false
+				end
+			end
+		end
+		
+		-- Weapon ESP
+		if weaponESP then
+			local weaponText = "Unarmed"
+			for _, tool in pairs(character:GetChildren()) do
+				if tool:IsA("Tool") then
+					weaponText = tool.Name:gsub("[%[%]]", "")
+					break
+				end
+			end
+			
+			if not espDrawings[player.UserId].weapon then
+				espDrawings[player.UserId].weapon = Drawing.new("Text")
+			end
+			
+			local weaponLabel = espDrawings[player.UserId].weapon
+			weaponLabel.Visible = true
+			weaponLabel.Text = weaponText
+			weaponLabel.Color = espColor
+			weaponLabel.Size = 13
+			weaponLabel.Center = true
+			weaponLabel.Outline = true
+			weaponLabel.Position = Vector2.new(screenPos.X, screenPos.Y + 15)
+		elseif espDrawings[player.UserId].weapon then
+			espDrawings[player.UserId].weapon.Visible = false
+		end
+		
+		-- Armor ESP
+		if armorESP then
+			local bodyEffects = character:FindFirstChild("BodyEffects")
+			if bodyEffects then
+				local armor = bodyEffects:FindFirstChild("Armor")
+				if armor then
+					local armorPercent = math.floor((armor.Value / 200) * 100)
+					
+					if not espDrawings[player.UserId].armor then
+						espDrawings[player.UserId].armor = Drawing.new("Text")
+					end
+					
+					local armorLabel = espDrawings[player.UserId].armor
+					armorLabel.Visible = true
+					armorLabel.Text = "Armor: " .. armorPercent .. "%"
+					
+					if armorPercent > 70 then
+						armorLabel.Color = Color3.fromRGB(100, 200, 255)
+					elseif armorPercent > 30 then
+						armorLabel.Color = Color3.fromRGB(150, 150, 255)
+					else
+						armorLabel.Color = Color3.fromRGB(200, 100, 100)
+					end
+					
+					armorLabel.Size = 13
+					armorLabel.Center = true
+					armorLabel.Outline = true
+					armorLabel.Position = Vector2.new(screenPos.X, screenPos.Y - 20)
+				end
+			end
+		elseif espDrawings[player.UserId].armor then
+			espDrawings[player.UserId].armor.Visible = false
+		end
+		
+		-- Highlight ESP
+		if highlightESP then
+			local highlight = character:FindFirstChild("ESPHighlight")
+			if not highlight then
+				highlight = Instance.new("Highlight")
+				highlight.Name = "ESPHighlight"
+				highlight.FillColor = espColor
+				highlight.OutlineColor = espColor
+				highlight.FillTransparency = 0.5
+				highlight.OutlineTransparency = 0
+				highlight.Parent = character
+			else
+				highlight.FillColor = espColor
+				highlight.OutlineColor = espColor
+			end
+		else
+			local highlight = character:FindFirstChild("ESPHighlight")
+			if highlight then
+				highlight:Destroy()
+			end
+		end
+		
+		-- Chams ESP
+		if chamsESP then
+			for _, part in pairs(character:GetDescendants()) do
+				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+					if not part:GetAttribute("OriginalColor") then
+						part:SetAttribute("OriginalColor", part.Color)
+						part:SetAttribute("OriginalMaterial", part.Material.Name)
+					end
+					part.Color = espColor
+					part.Material = Enum.Material.ForceField
+				end
+			end
+		else
+			for _, part in pairs(character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					local origColor = part:GetAttribute("OriginalColor")
+					local origMaterial = part:GetAttribute("OriginalMaterial")
+					if origColor then
+						part.Color = origColor
+					end
+					if origMaterial then
+						part.Material = Enum.Material[origMaterial]
+					end
+				end
+			end
+		end
+	end
+end)
+
+-- Clean up ESP when players leave
+Players.PlayerRemoving:Connect(function(player)
+	if espDrawings[player.UserId] then
+		for _, drawing in pairs(espDrawings[player.UserId]) do
+			if drawing then
+				pcall(function() drawing.Visible = false drawing:Remove() end)
+			end
+		end
+		espDrawings[player.UserId] = nil
+	end
+end)
+
+-- Bullet Tracers
+local bulletTracerLines = {}
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed or not bulletTracers then return end
+	
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		local character = LocalPlayer.Character
+		if not character then return end
+		
+		local currentGun = nil
+		for _, child in pairs(character:GetChildren()) do
+			if child:IsA("Tool") then
+				currentGun = child
+				break
+			end
+		end
+		
+		if not currentGun then return end
+		
+		local handle = currentGun:FindFirstChild("Handle")
+		if not handle then return end
+		
+		task.spawn(function()
+			local startPos = handle.Position
+			local mousePos = Mouse.Hit.Position
+			
+			local tracer = Drawing.new("Line")
+			tracer.Visible = true
+			tracer.Color = Color3.fromRGB(255, 255, 0)
+			tracer.Thickness = 2
+			tracer.Transparency = 1
+			
+			table.insert(bulletTracerLines, {tracer = tracer, time = tick()})
+			
+			for i = 1, 10 do
+				local startScreen = Camera:WorldToViewportPoint(startPos)
+				local endScreen = Camera:WorldToViewportPoint(mousePos)
+				
+				if startScreen and endScreen then
+					tracer.From = Vector2.new(startScreen.X, startScreen.Y)
+					tracer.To = Vector2.new(endScreen.X, endScreen.Y)
+				end
+				
+				task.wait(0.02)
+			end
+			
+			tracer.Visible = false
+			tracer:Remove()
+		end)
+	end
+end)
+
+-- Clean up old bullet tracers
+RunService.Heartbeat:Connect(function()
+	local currentTime = tick()
+	for i = #bulletTracerLines, 1, -1 do
+		if currentTime - bulletTracerLines[i].time > 0.2 then
+			if bulletTracerLines[i].tracer then
+				pcall(function()
+					bulletTracerLines[i].tracer.Visible = false
+					bulletTracerLines[i].tracer:Remove()
+				end)
+			end
+			table.remove(bulletTracerLines, i)
+		end
+	end
+end)
+
+-- Damage Indicators
+local lastHealthValues = {}
+
+RunService.Heartbeat:Connect(function()
+	if not damageIndicators then return end
+	
+	for _, player in pairs(Players:GetPlayers()) do
+		if player == LocalPlayer then continue end
+		
+		local character = player.Character
+		if not character then continue end
+		
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then continue end
+		
+		local rootPart = character:FindFirstChild("HumanoidRootPart")
+		if not rootPart then continue end
+		
+		if not lastHealthValues[player.UserId] then
+			lastHealthValues[player.UserId] = humanoid.Health
+			continue
+		end
+		
+		local healthChange = lastHealthValues[player.UserId] - humanoid.Health
+		if healthChange > 0 then
+			task.spawn(function()
+				local damageText = Drawing.new("Text")
+				damageText.Text = "-" .. math.floor(healthChange)
+				damageText.Color = Color3.fromRGB(255, 50, 50)
+				damageText.Size = 20
+				damageText.Center = true
+				damageText.Outline = true
+				damageText.Visible = true
+				
+				table.insert(damageLabels, {text = damageText, startTime = tick(), part = rootPart})
+				
+				for i = 1, 30 do
+					local screenPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position + Vector3.new(0, 3 + i/5, 0))
+					if onScreen then
+						damageText.Position = Vector2.new(screenPos.X, screenPos.Y)
+						damageText.Transparency = 1 - (i / 30)
+					end
+					task.wait(0.03)
+				end
+				
+				damageText.Visible = false
+				damageText:Remove()
+			end)
+		end
+		
+		lastHealthValues[player.UserId] = humanoid.Health
+	end
+end)
+
+-- Clean up damage labels
+Players.PlayerRemoving:Connect(function(player)
+	lastHealthValues[player.UserId] = nil
+end)
+
+print("Visuals Tab loaded successfully!")
+
