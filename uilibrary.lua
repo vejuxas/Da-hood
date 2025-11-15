@@ -1,8 +1,4 @@
--[[
-    Made by samet.exe
 
-    Assign different flags to each element to prevent from configs overriding eachother
-    Example script is at the bottom
 
     Documentation:
         function Library:Window(Data: table
@@ -5397,3 +5393,4 @@ end
 
 getgenv().Library = Library
 return Library
+
