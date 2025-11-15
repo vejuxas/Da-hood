@@ -599,12 +599,12 @@ local Library do
             Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/windows-xp-tahoma.ttf"
         })
 
-        -- Using a cleaner modern font (Source Sans Pro)
+        -- Using FredokaOne (cartoony rounded font)
         local fontSuccess, fontResult = pcall(function()
-            CustomFont:New("SourceSansPro", 400, "Regular", {
-                Url = "https://github.com/adobe-fonts/source-sans/raw/release/OTF/SourceSansPro-Regular.otf"
+            CustomFont:New("FredokaOne", 400, "Regular", {
+                Url = "https://github.com/google/fonts/raw/main/ofl/fredokaone/FredokaOne-Regular.ttf"
             })
-            return CustomFont:Get("SourceSansPro")
+            return CustomFont:Get("FredokaOne")
         end)
         
         if fontSuccess and fontResult then
@@ -5272,5 +5272,7 @@ end
 
 getgenv().Library = Library
 return Library
+
+
 
 
