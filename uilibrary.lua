@@ -725,7 +725,7 @@ local Library do
         })
 
         -- Using Gotham font (Roblox default) instead
-        Library.Font = Font.new("rbxasset://fonts/families/GothamSSm.json")
+        Library.Font = Font.fromName("GothamSSm")
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
