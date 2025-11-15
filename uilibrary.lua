@@ -667,29 +667,54 @@ local Library do
     end
 
     Library.Unload = function(self)
-        -- Animate closing
+        -- Animate closing with fade out and scale down
         if self.Holder and self.Holder.Instance then
-            -- Fade out and scale down all window outlines
-            for _, descendant in pairs(self.Holder.Instance:GetDescendants()) do
-                if descendant:IsA("Frame") and descendant.Name == "\0" and descendant.Parent == self.Holder.Instance then
-                    -- This is likely a window outline
-                    local originalSize = descendant.Size
-                    TweenService:Create(descendant, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                        Size = UDim2New(originalSize.X.Scale, 0, 0, 0),
-                        BackgroundTransparency = 1
-                    }):Play()
-                elseif descendant:IsA("UIStroke") then
-                    TweenService:Create(descendant, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Transparency = 1}):Play()
-                elseif descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
-                    TweenService:Create(descendant, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
-                elseif descendant:IsA("ImageLabel") or descendant:IsA("ImageButton") then
-                    TweenService:Create(descendant, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {ImageTransparency = 1}):Play()
-                elseif (descendant:IsA("Frame") or descendant:IsA("ScrollingFrame")) and descendant.Parent ~= self.Holder.Instance then
-                    TweenService:Create(descendant, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+            local windowsToAnimate = {}
+            
+            -- Find all main window outlines (direct children of Holder)
+            for _, child in pairs(self.Holder.Instance:GetChildren()) do
+                if child:IsA("Frame") or child:IsA("TextButton") then
+                    TableInsert(windowsToAnimate, child)
                 end
             end
             
-            task.wait(0.3)
+            -- Animate all windows
+            for _, window in pairs(windowsToAnimate) do
+                local originalSize = window.Size
+                local originalPosition = window.Position
+                local anchorPoint = window.AnchorPoint
+                
+                -- Create fade out and scale down animation
+                local closeTween = TweenService:Create(
+                    window,
+                    TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+                    {
+                        Size = UDim2New(originalSize.X.Scale * 0.8, 0, 0, 0),
+                        BackgroundTransparency = 1,
+                        Position = UDim2New(originalPosition.X.Scale, originalPosition.X.Offset, originalPosition.Y.Scale + 0.1, originalPosition.Y.Offset)
+                    }
+                )
+                
+                -- Fade out all content inside windows
+                for _, descendant in pairs(window:GetDescendants()) do
+                    if descendant:IsA("UIStroke") then
+                        TweenService:Create(descendant, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Transparency = 1}):Play()
+                    elseif descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+                        TweenService:Create(descendant, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
+                    elseif descendant:IsA("ImageLabel") or descendant:IsA("ImageButton") then
+                        TweenService:Create(descendant, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {ImageTransparency = 1}):Play()
+                    elseif (descendant:IsA("Frame") or descendant:IsA("ScrollingFrame")) and descendant ~= window then
+                        if descendant.BackgroundTransparency < 1 then
+                            TweenService:Create(descendant, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+                        end
+                    end
+                end
+                
+                closeTween:Play()
+            end
+            
+            -- Wait for animation to complete
+            task.wait(0.4)
         end
         
         for Index, Value in self.Connections do 
@@ -5272,7 +5297,6 @@ end
 
 getgenv().Library = Library
 return Library
-
 
 
 
