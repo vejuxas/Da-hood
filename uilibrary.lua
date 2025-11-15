@@ -724,8 +724,20 @@ local Library do
             Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/windows-xp-tahoma.ttf"
         })
 
-        -- Using Gotham font (Roblox default) instead
-        Library.Font = Font.fromName("GothamSSm")
+        -- Using a cleaner modern font (Source Sans Pro)
+        local fontSuccess, fontResult = pcall(function()
+            CustomFont:New("SourceSansPro", 400, "Regular", {
+                Url = "https://github.com/adobe-fonts/source-sans/raw/release/OTF/SourceSansPro-Regular.otf"
+            })
+            return CustomFont:Get("SourceSansPro")
+        end)
+        
+        if fontSuccess and fontResult then
+            Library.Font = fontResult
+        else
+            -- Fallback to original font if custom font fails
+            Library.Font = CustomFont:Get("Windows-XP-Tahoma")
+        end
     end
 
     Library.Holder = Instances:Create("ScreenGui", {
