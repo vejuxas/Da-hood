@@ -4293,8 +4293,79 @@ local Library do
 
         function Window:SetOpen(Bool)
             Window.IsOpen = Bool
-
-            Items["Outline"].Instance.Visible = Bool
+            local windowFrame = Items["Outline"].Instance
+            local originalSize = Window.Size
+            
+            if Bool then
+                -- Opening animation
+                windowFrame.Visible = true
+                windowFrame.Size = UDim2New(originalSize.X.Scale, 0, 0, 0)
+                windowFrame.BackgroundTransparency = 1
+                
+                -- Fade in and scale up
+                local openTween = TweenService:Create(
+                    windowFrame,
+                    TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                    {
+                        Size = originalSize, -- Restore original size
+                        BackgroundTransparency = 0
+                    }
+                )
+                
+                -- Fade in all content
+                for _, descendant in pairs(windowFrame:GetDescendants()) do
+                    if descendant:IsA("UIStroke") then
+                        descendant.Transparency = 1
+                        TweenService:Create(descendant, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 0}):Play()
+                    elseif descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+                        descendant.TextTransparency = 1
+                        TweenService:Create(descendant, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+                    elseif descendant:IsA("ImageLabel") or descendant:IsA("ImageButton") then
+                        descendant.ImageTransparency = 1
+                        TweenService:Create(descendant, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0}):Play()
+                    elseif (descendant:IsA("Frame") or descendant:IsA("ScrollingFrame")) and descendant ~= windowFrame then
+                        if descendant.BackgroundTransparency < 1 then
+                            descendant.BackgroundTransparency = 1
+                            TweenService:Create(descendant, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
+                        end
+                    end
+                end
+                
+                openTween:Play()
+            else
+                -- Closing animation
+                local originalSize = windowFrame.Size
+                
+                -- Fade out and scale down
+                local closeTween = TweenService:Create(
+                    windowFrame,
+                    TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+                    {
+                        Size = UDim2New(originalSize.X.Scale * 0.9, 0, 0, 0),
+                        BackgroundTransparency = 1
+                    }
+                )
+                
+                -- Fade out all content
+                for _, descendant in pairs(windowFrame:GetDescendants()) do
+                    if descendant:IsA("UIStroke") then
+                        TweenService:Create(descendant, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Transparency = 1}):Play()
+                    elseif descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+                        TweenService:Create(descendant, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
+                    elseif descendant:IsA("ImageLabel") or descendant:IsA("ImageButton") then
+                        TweenService:Create(descendant, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {ImageTransparency = 1}):Play()
+                    elseif (descendant:IsA("Frame") or descendant:IsA("ScrollingFrame")) and descendant ~= windowFrame then
+                        if descendant.BackgroundTransparency < 1 then
+                            TweenService:Create(descendant, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+                        end
+                    end
+                end
+                
+                closeTween:Play()
+                closeTween.Completed:Connect(function()
+                    windowFrame.Visible = false
+                end)
+            end
         end
 
         Library:Connect(UserInputService.InputBegan, function(Input, GameProcessed)
@@ -5297,6 +5368,5 @@ end
 
 getgenv().Library = Library
 return Library
-
 
 
